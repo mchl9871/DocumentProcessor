@@ -175,4 +175,4 @@ if __name__ == "__main__":
         print("No documents processed.")
 
     elapsed_time = time.time() - start_time
-    print(f"⏳ Script completed in {int(elapsed_time // 60)} minutes and {int(elapsed_time % 60)} seconds.")
+    print(f"⏳ Script completed in {int(elapsed_time // 60)} minutes and {int(elapsed_time % 60)} seconds.") 
