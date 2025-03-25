@@ -20,9 +20,9 @@ def remove_invalid_xml_chars(s):
 def save_to_excel(df, output_filename):
     """
     Writes the DataFrame to Excel with:
-      - A black header row at row 1
-      - Data from row 2 onward
-      - Creates a formatted table, auto-filter, etc.
+      - A black header row at row 6
+      - Data from row 7 onward
+      - Adds specified text into specified cells
 
     'output_filename' is a full path to the final .xlsx file.
     """
@@ -46,25 +46,31 @@ def save_to_excel(df, output_filename):
         "Hyperlink"
     ]
 
-    # Write the DataFrame at row=2 (header row=1 is black)
+    # Write the DataFrame at row=7 (header row=6 is black)
     with pd.ExcelWriter(output_filename, engine="openpyxl") as writer:
         df.to_excel(
             writer,
             sheet_name="Document Register",
             index=False,
             header=False,
-            startrow=1  # data starts at row 2
+            startrow=6  # data starts at row 7
         )
 
         workbook = writer.book
         sheet = writer.sheets["Document Register"]
+
+        # Add specified text into specified cells
+        sheet["A1"] = "Proceeding Title:"
+        sheet["A2"] = "Court Proceeding No:"
+        sheet["A3"] = "Party Creating Document:"
+        sheet["F3"] = "Date of Document:"
 
         # 1) Black header row
         black_fill = PatternFill(start_color="000000", end_color="000000", fill_type="solid")
         white_font = Font(color="FFFFFF", bold=True)
 
         for col_idx, header_name in enumerate(custom_headers, start=1):
-            cell = sheet.cell(row=1, column=col_idx)
+            cell = sheet.cell(row=6, column=col_idx)
             cell.value = header_name
             cell.fill = black_fill
             cell.font = white_font
@@ -77,25 +83,10 @@ def save_to_excel(df, output_filename):
             sheet.column_dimensions[col_letter].width = width
 
         # 3) Wrap text in data area
-        data_end_row = 1 + len(df)
-        for row in range(2, data_end_row + 1):
+        data_end_row = 6 + len(df)
+        for row in range(7, data_end_row + 1):
             for col in range(1, len(custom_headers) + 1):
                 cell = sheet.cell(row=row, column=col)
                 cell.alignment = Alignment(wrap_text=True)
-
-        # 4) Create table with auto-filter
-        table_range = f"A1:{get_column_letter(len(custom_headers))}{len(df) + 1}"
-        sheet.auto_filter.ref = table_range
-
-        table_obj = openpyxl.worksheet.table.Table(displayName="DocumentRegister", ref=table_range)
-        style = openpyxl.worksheet.table.TableStyleInfo(
-            name="TableStyleMedium9",
-            showFirstColumn=False,
-            showLastColumn=False,
-            showRowStripes=True,
-            showColumnStripes=True,
-        )
-        table_obj.tableStyleInfo = style
-        sheet.add_table(table_obj)
 
     print(f"✅ Document Register saved to: {output_filename}")
